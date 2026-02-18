@@ -1,0 +1,97 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: ci-cd-pipeline
+spec:
+  workspaces:
+    - name: output
+
+  params:
+    - name: repo-url
+      type: string
+    - name: revision
+      type: string
+      default: main
+    - name: build-image
+      type: string
+    - name: app-name
+      type: string
+
+  tasks:
+
+    - name: cleanup
+      taskRef:
+        name: cleanup
+      workspaces:
+        - name: source
+          workspace: output
+
+    - name: git-clone
+      runAfter: ["cleanup"]
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      params:
+        - name: url
+          value: $(params.repo-url)
+        - name: revision
+          value: $(params.revision)
+        - name: deleteExisting
+          value: "true"
+      workspaces:
+        - name: output
+          workspace: output
+
+    - name: flake8
+      runAfter: ["git-clone"]
+      taskSpec:
+        workspaces:
+          - name: source
+        steps:
+          - name: lint
+            image: python:3.9-slim
+            workingDir: $(workspaces.source.path)
+            script: |
+              python -m pip install --upgrade pip wheel
+              pip install -r requirements.txt
+              pip install flake8
+              flake8 . --max-line-length=120
+      workspaces:
+        - name: source
+          workspace: output
+
+    - name: nose
+      runAfter: ["flake8"]
+      taskRef:
+        name: nose
+      params:
+        - name: args
+          value: "-v"
+      workspaces:
+        - name: source
+          workspace: output
+
+    - name: buildah
+      runAfter: ["nose"]
+      taskRef:
+        kind: ClusterTask
+        name: buildah
+      params:
+        - name: IMAGE
+          value: $(params.build-image)
+        - name: TLSVERIFY
+          value: "false"
+      workspaces:
+        - name: source
+          workspace: output
+
+    - name: deploy
+      runAfter: ["buildah"]
+      taskRef:
+          kind: ClusterTask
+          name: openshift-client
+      params:
+        - name: SCRIPT
+          value: |
+            oc create deployment $(params.app-name) --image=$(params.build-image) --dry-run=client -o yaml | oc apply -f -
+
