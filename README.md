@@ -15,7 +15,7 @@ by hand.
 - A `bin/setup.sh` script that sets up the whole dev environment (Python 3.9,
   virtual env, Selenium/Chrome for BDD testing) in one go
 
-## CI — GitHub Actions
+## CI - GitHub Actions
 
 Defined in `.github/workflows/workflow.yml`. On every push or PR to `main`, it:
 
@@ -25,16 +25,16 @@ Defined in `.github/workflows/workflow.yml`. On every push or PR to `main`, it:
    flags complexity over 10 and lines over 127 chars)
 4. Runs the unit tests with **nose**, with coverage on the `app` package
 
-## CD — Tekton Pipeline
+## CD - Tekton Pipeline
 
 Defined in `.tekton/`. The pipeline runs as a chain of tasks:
 
 1. **cleanup** — wipes the workspace so the build starts clean
 2. **git-clone** — clones the repo at the given revision
-3. **flake8** — lints the code (max line length 120)
-4. **nose** — runs the unit tests
-5. **buildah** — builds the container image from the Dockerfile
-6. **deploy** — uses the OpenShift client to create/update the deployment with the
+3. **flake8** - lints the code (max line length 120)
+4. **nose** - runs the unit tests
+5. **buildah** - builds the container image from the Dockerfile
+6. **deploy** - uses the OpenShift client to create/update the deployment with the
    new image
 
 Each step only runs if the one before it passes — so a failed lint or test stops
@@ -54,6 +54,4 @@ Python · Flask · GitHub Actions · Tekton · Buildah · OpenShift · Docker ·
 - The full loop: code change → lint → test → build → deploy, with no manual steps
   in between
 
-## Author
 
-Preethi
