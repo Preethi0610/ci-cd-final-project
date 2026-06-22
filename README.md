@@ -37,7 +37,7 @@ Defined in `.tekton/`. The pipeline runs as a chain of tasks:
 6. **deploy** - uses the OpenShift client to create/update the deployment with the
    new image
 
-Each step only runs if the one before it passes — so a failed lint or test stops
+Each step only runs if the one before it passes so a failed lint or test stops
 the deploy from happening.
 
 ## Tech stack
