@@ -29,8 +29,8 @@ Defined in `.github/workflows/workflow.yml`. On every push or PR to `main`, it:
 
 Defined in `.tekton/`. The pipeline runs as a chain of tasks:
 
-1. **cleanup** — wipes the workspace so the build starts clean
-2. **git-clone** — clones the repo at the given revision
+1. **cleanup** - wipes the workspace so the build starts clean
+2. **git-clone** - clones the repo at the given revision
 3. **flake8** - lints the code (max line length 120)
 4. **nose** - runs the unit tests
 5. **buildah** - builds the container image from the Dockerfile
